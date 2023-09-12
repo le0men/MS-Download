@@ -1,6 +1,5 @@
 import requests
 import vlc
-import json
 import tkinter as tk
 
 
@@ -23,18 +22,23 @@ def make_valid(filename):
 
 def createWindow():
 
+  #play song given cid
   def playSong ():
+   pullRequest = 'https://monster-siren.hypergryph.com/api/song/' + ent_cid.get()
+   song = requests.get(pullRequest, headers={'Accept': 'application/json'}).json()['data']
 
-   #pullRequest = "https://monster-siren.hypergryph.com/music/api/song/306837" #+ ent_cid.get()
-   #song = requests.get(pullRequest, headers={'Accept': 'application/json'}).json()['data']
-   song = requests.get('https://monster-siren.hypergryph.com/api/song/306837', headers={'Accept': 'application/json'}).json()['data']
-   source = song['sourceUrl']
+   try:
+     source = song['sourceUrl']
+   except: 
+     lbl_result["text"] = "Invalid CID"
+     return
 
-
-   print(source) 
    p = vlc.MediaPlayer(source)
    p.play()
 
+   lbl_result["text"] = "Now Playing: " + song['name']
+
+#_____________________________________________________
   # declare the window
   window = tk.Tk()
   # set window title
@@ -54,15 +58,18 @@ def createWindow():
   ent_cid.grid(row=0, column=0, sticky="e")
   lbl_cid.grid(row=0, column=1, sticky="w")
 
+  # play song from cid in entry box
   btn_play = tk.Button(
     master=window,
     text="Play",
-    command = playSong()
+    command = playSong
   )
+  lbl_result = tk.Label(master=window, text="Now Playing: Nothing!")
 
   # Set up the layout using the .grid() geometry manager
   frm_entry.grid(row=0, column=0, padx=10)
-  btn_play.grid(row=0, column=1, pady=10)
+  btn_play.grid(row=0, column=1, pady=5, padx=10)
+  lbl_result.grid(row=1, column=0, sticky="e")
 
   window.mainloop()
 
