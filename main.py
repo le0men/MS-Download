@@ -1,6 +1,8 @@
 import requests
+import os
 import vlc
 import tkinter as tk
+from tqdm import tqdm
 
 
 def make_valid(filename):
@@ -40,6 +42,7 @@ def createWindow():
 
 #_____________________________________________________
 
+  # loads song into player, sets data
   def loadSong ():
 
     pullRequest = 'https://monster-siren.hypergryph.com/api/song/' + ent_cid.get()
@@ -58,6 +61,39 @@ def createWindow():
     songGlobal["songData"]= song
     songGlobal["isPlaying"] = False
   
+#_____________________________________________________
+
+ #play song given cid
+  def downloadSong ():
+
+    if not(songGlobal["loaded"]): 
+      lbl_result["text"] = "No Song Loaded"
+      return
+    
+    source = requests.get(songGlobal['songData']['sourceUrl'], stream=True)
+    filename = './MonsterSiren/' + '/' + make_valid(songGlobal['songData']['name'])
+
+    if source.headers['content-type'] == 'audio/mpeg':
+        filename += '.mp3'
+    else:
+        filename += '.wav'
+
+    # Download song
+    total = int(source.headers.get('content-length', 0))
+    with open(filename, 'w+b') as f, tqdm(
+        desc=songGlobal['songData']['name'],
+        total=total,
+        unit='iB',
+        unit_scale=True,
+        unit_divisor=1024,
+    ) as bar:
+        for data in source.iter_content(chunk_size = 1024):
+            size = f.write(data)
+            bar.update(size)
+
+    lbl_result["text"] = "Downloaded (" +songGlobal['songData']['name']+ ") to [" + filename + "]"
+
+
 #_____________________________________________________
 
   # declare the window
@@ -97,16 +133,30 @@ def createWindow():
     command = loadSong
   )
 
+  # download loaded song
+  btn_download = tk.Button(
+    master=window,
+    text="Download",
+    command = downloadSong
+  )
+
   # Set up the layout using the .grid() geometry manager
   frm_entry.grid(row=0, column=0, padx=10)
   btn_play.grid(row=0, column=2, pady=5, padx=10)
   btn_load.grid(row=0, column=1, pady=5, padx=10)
-  lbl_result.grid(row=1, column=0, sticky="e")
+  btn_download.grid(row=0, column=3, pady=5, padx=10)
+  lbl_result.grid(row=1, columnspan=4, sticky="w", padx =5, pady=5)
 
   window.mainloop()
 
  
 def main():
+  directory = './MonsterSiren/'
+  try:
+        os.mkdir(directory)
+  except:
+        pass
+
   
   createWindow()
   

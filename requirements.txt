@@ -1,3 +1,4 @@
 requests
 tkinter 
 python-vlc
+tqdm
