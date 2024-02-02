@@ -4,8 +4,8 @@ Monster Siren. By inputting the song's CID into the input (found in the URL),
 the song can be previewed and downloaded. 
 
 # Dependencies
-Tested primarly on windows 11.
-Requires Python 3.
-Run '''pip install -r requirements.txt''' before use. 
+Tested primarly on windows 11. <br>
+Requires Python 3. <br>
+Run `pip install -r requirements.txt` before use. 
 
 
